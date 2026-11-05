@@ -1,9 +1,10 @@
 import sqlalchemy
 import requests
-from sqlalchemy import inspect
+from sqlalchemy import inspect, select
 import sqlmodel
 from sqlmodel import Field, SQLModel, create_engine, Session
 from datetime import date
+from tabulate import tabulate
 
 
 sqlite_file_name = "meteo.db"
@@ -54,23 +55,38 @@ print("Tables présentes dans la base :", inspect(engine).get_table_names())
 
         
 
+# with Session(engine) as session:
+#     liste_ville = [
+#         Villes(nom = "La Rochelle", latitude = 46.166672, longitude = -1.150000 ),
+#         Villes(nom = "Paris", latitude = 48.8534, longitude = 2.3522),
+#         Villes(nom = "Tergnier", latitude = 49.656, longitude = 3.292),
+#     ]
+#     try:
+#         #valid_city = check_city.model_validate(liste_ville)
+#         session.add_all(liste_ville)
+#         session.commit()
+#         print("Insertion réussie avec succès !")
+#     except ValueError as e :
+#         print(f"Validation Échouée : \n{e}")
+
+
 with Session(engine) as session:
-    liste_ville = [
-        Villes(nom = "La Rochelle", latitude = 46.166672, longitude = -1.150000 ),
-        Villes(nom = "Paris", latitude = 48.8534, longitude = 2.3522),
-        Villes(nom = "Tergnier", latitude = 49.656, longitude = 3.292),
-    ]
+    
     try:
-        #valid_city = check_city.model_validate(liste_ville)
-        session.add_all(liste_ville)
-        session.commit()
-        print("Insertion réussie avec succès !")
+        requete = select(Villes)
+        villes = session.exec(requete).all()
+        #print(tabulate(villes))
+        for ville in villes:
+            meteo_url = f"https://api.open-meteo.com/v1/forecast?latitude={ville[0].latitude}&longitude={ville[0].longitude}&current_weather=true"
+            reponse = requests.get(meteo_url)
+            api_data = reponse.json()
+            current_weather_units = api_data['current_weather']
+            print(current_weather_units)
+            for key in current_weather_units :
+                print(f"{key} : {current_weather_units[key]}")
+            print("--" * 40)    
+            
+            
     except ValueError as e :
         print(f"Validation Échouée : \n{e}")
 
-meteo_url = f("https://api.open-meteo.com/v1/forecast?latitude=48.85&longitude=2.35&current_weather=true")
-url3 = "https://httpbin.org/get"
-
-params={"ville": "Paris", "mois": "Juillet"}
-reponse = requests.get(url3, params)
-print(reponse.url)

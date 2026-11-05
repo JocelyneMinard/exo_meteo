@@ -30,7 +30,7 @@ reponse = requests.post(url4, json = params)
 print(reponse.url)
 print(reponse.json().get("json"))
 
-url5 = "https://httpbin.org/cookies"
-params={"ville": "Paris", "mois": "Juillet"}
-reponse = requests.post(url4, params)
-print(reponse.url)
+# url5 = "https://httpbin.org/cookies"
+# params={"ville": "Paris", "mois": "Juillet"}
+# reponse = requests.post(url4, params)
+# print(reponse.url)
