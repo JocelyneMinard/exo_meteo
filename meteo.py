@@ -4,8 +4,8 @@ import requests
 from sqlalchemy import inspect, select
 import sqlmodel
 from sqlmodel import Field, SQLModel, create_engine, Session
-from datetime import date, datetime, timezone
-from pydantic import field_validator
+from datetime import datetime, timezone
+from pydantic import ValidationError, field_validator
 
 
 sqlite_file_name = "meteo.db"
@@ -18,13 +18,7 @@ class Villes(SQLModel, table = True):
     nom: str
     latitude: float 
     longitude: float
-    @field_validator("latitude", "longitude" mode="before")
-    @classmethod
-    def remplacer_virgule(cls, v):
-        if isinstance(v, str):
-        # Remplace la virgule par un point
-        v = v.replace(",", ".")
-        return v 
+
 
 class Releves(SQLModel, table = True):
     __tablename__ = "releves"
@@ -51,8 +45,10 @@ if not os.path.exists(sqlite_file_name):
             session.add_all(liste_ville)
             session.commit()
             print("Insertion réussie avec succès !")
-        except ValueError as e :
-            print(f"Validation Échouée : \n{e}")
+        except ValidationError as e:
+            print(f"Validation Pydantic Échouée : \n{e}")
+        except Exception as e :
+            print(f"Erreur de base : \n{e}")
 
 
 with Session(engine) as session:
@@ -83,12 +79,11 @@ with Session(engine) as session:
     try:
         requete = select(Villes)
         requete = (
-            select(Villes.nom, Releves.temperature, Releves.vitesse_vent)
-            .outerjoin(Releves.ville_id)  # LEFT JOIN : on garde les catégories sans produit
-            .group_by(Villes.nom)
+            select(Villes.nom, Releves.temperature, Releves.vitesse_vent, Releves.date_heure)
+            .outerjoin(Releves, Releves.ville_id == Villes.id) 
         )
         for ligne in session.exec(requete):
-            print(f"{ligne.nom:<15} {ligne.nb_produits} produit(s)")
-    except ValueError as e :
+            print(f"{ligne.nom:<15} {ligne.temperature}")
+    except Exception as e :
             print(f"Requête Échouée : \n{e}")
     
