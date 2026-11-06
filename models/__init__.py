@@ -33,24 +33,23 @@ def create_db(engine, sqlite_file_name):
                 print(f"Erreur de base : \n{e}")
 
 
-def add_data(engine):
-    with Session(engine) as session:
-        try:
-            requete = select(Villes)
-            villes = session.exec(requete).all()
-            for ville in villes:
-                meteo_url = f"https://api.open-meteo.com/v1/forecast?latitude={ville[0].latitude}&longitude={ville[0].longitude}&current_weather=true"
-                reponse = requests.get(meteo_url)
-                api_data = reponse.json()
-                current_weather_units = api_data['current_weather']
-                date_releve = datetime.fromisoformat(current_weather_units["time"])
-                date_releve = date_releve.replace(tzinfo=timezone.utc)
-                print(current_weather_units["temperature"])
-                print(current_weather_units["windspeed"])
-                new_data = Releves(temperature = f"{current_weather_units["temperature"]}", vitesse_vent = f"{current_weather_units["windspeed"]}", date_heure = date_releve, ville_id = ville[0].id) 
-                session.add(new_data)
-                session.commit() 
-                print("--" * 40)
-                
-        except ValueError as e :
-            print(f"Requête Échouée : \n{e}")
+def add_data(session: Session):
+    try:
+        requete = select(Villes)
+        villes = session.exec(requete).all()
+        for ville in villes:
+            meteo_url = f"https://api.open-meteo.com/v1/forecast?latitude={ville[0].latitude}&longitude={ville[0].longitude}&current_weather=true"
+            reponse = requests.get(meteo_url)
+            api_data = reponse.json()
+            current_weather_units = api_data['current_weather']
+            date_releve = datetime.fromisoformat(current_weather_units["time"])
+            date_releve = date_releve.replace(tzinfo=timezone.utc)
+            print(current_weather_units["temperature"])
+            print(current_weather_units["windspeed"])
+            new_data = Releves(temperature = f"{current_weather_units["temperature"]}", vitesse_vent = f"{current_weather_units["windspeed"]}", date_heure = date_releve, ville_id = ville[0].id) 
+            session.add(new_data)
+            session.commit() 
+            print("--" * 40)
+            
+    except ValueError as e :
+        print(f"Requête Échouée : \n{e}")

@@ -22,18 +22,21 @@ engine = create_engine(sqlite_url, echo=True)
 # Initialisation de FastAPI
 app = FastAPI(title="API Météo")
 
+# Fonction de dépendance pour FastAPI
+def get_session():
+    with Session(engine) as session:
+        yield session 
 
 # --- ROUTES ---
-
 @app.get("/")
 def read_root():
     return {"message": "Bienvenue sur l'API Météo"}
 
 
 @app.get("/meteo")
-def get_all_meteo():
+def get_all_meteo(session: Session = Depends(get_session)):
     try:
-        liste_meteo = view_data(engine)
+        liste_meteo = view_data(session)
         # 5. On renvoie la liste complète à FastAPI pour qu'il la transforme en JSON
         return liste_meteo
 
@@ -42,10 +45,10 @@ def get_all_meteo():
 
 
 @app.post("/meteo/add")
-def add_meteo_data():
+def add_meteo_data(session: Session = Depends(get_session)):
     """Déclenche manuellement la récupération des données Open-Meteo pour chaque ville."""
     try:
-        add_data(engine)
+        add_data(session)
         return {"status": "success", "message": "nouveaux relevés ajoutés."}
         
     except Exception as e:
