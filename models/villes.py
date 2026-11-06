@@ -1,4 +1,3 @@
-import sqlmodel
 from sqlmodel import Field, SQLModel
 
 class Villes(SQLModel, table = True):

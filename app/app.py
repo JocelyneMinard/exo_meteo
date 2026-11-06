@@ -1,13 +1,52 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends, HTTPException
+from sqlmodel import create_engine, Session
+import os
+import sys
 
-app = FastAPI()
+# Récupère le chemin absolu du dossier parent
+parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 
+# Ajoute le dossier parent au chemin de recherche de Python si ce n'est pas déjà fait
+if parent_dir not in sys.path:
+    sys.path.insert(0, parent_dir)
+
+# Importations de vos modules existants
+from models import add_data
+from services import view_data
+
+# Configuration de la base de données
+sqlite_file_name = "meteo.db"
+sqlite_url = f"sqlite:///{sqlite_file_name}"
+engine = create_engine(sqlite_url, echo=True)
+
+# Initialisation de FastAPI
+app = FastAPI(title="API Météo")
+
+
+# --- ROUTES ---
 
 @app.get("/")
 def read_root():
-    return {"Hello": "World"}
+    return {"message": "Bienvenue sur l'API Météo"}
 
 
-@app.get("/items/{item_id}")
-def read_item(item_id: int, q: str | None = None):
-    return {"item_id": item_id, "q": q}
+@app.get("/meteo")
+def get_all_meteo():
+    try:
+        liste_meteo = view_data(engine)
+        # 5. On renvoie la liste complète à FastAPI pour qu'il la transforme en JSON
+        return liste_meteo
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erreur lors de la requête : {e}")
+
+
+@app.post("/meteo/add")
+def add_meteo_data():
+    """Déclenche manuellement la récupération des données Open-Meteo pour chaque ville."""
+    try:
+        add_data(engine)
+        return {"status": "success", "message": "nouveaux relevés ajoutés."}
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Échec de la mise à jour : {e}")
