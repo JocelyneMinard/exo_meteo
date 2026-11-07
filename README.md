@@ -28,7 +28,16 @@ alembic upgrade head
 ### Conclusion
 Suite à l'utilisation d'alambic et le contrôle d'insertion de FastApi, j'ai renoncé à créer un validateur Pydantic avec RootModel
 
+Cet exercice m'aura permis de revenir sur deux notions, Pydantic et Alembic que je n'avais pas bien maîtrisées lors du brief précédent, ainsi que SQLModel
+
 ## Installation
 
 ```pip install -r requierements.txt```
 
+Pour lancer FastApi
+
+```uv run fastapi dev ```
+
+Ou
+
+```uvicorn app:app --reload ```
