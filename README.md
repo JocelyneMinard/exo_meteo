@@ -37,5 +37,8 @@ Pour lancer FastApi
 ```uv run fastapi dev ```
 
 Ou
-
-```uvicorn app:app --reload ```
+cd app puis
+```
+cd app 
+uvicorn app:app --reload
+```

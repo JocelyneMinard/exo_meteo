@@ -12,5 +12,6 @@ def add_city(session: Session, name, latitude, longitude):
     except ValidationError as e:
         session.rollback() 
         print(f"Validation Pydantic Échouée : \n{e}")
+        return e
 
     

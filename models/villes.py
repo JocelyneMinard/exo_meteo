@@ -4,9 +4,9 @@ from sqlmodel import Field, SQLModel, UniqueConstraint
 class Villes(SQLModel, table = True):
     __tablename__ = "villes"
     id : int | None = Field(default=None, primary_key=True)
-    nom: str
-    latitude: float 
-    longitude: float
+    nom: str =  Field(min_length=1)
+    latitude: float
+    longitude: float 
 
     # Ce validateur est au final inutile car le JSON dans FastApi n'accepte pas la virgule
     # Erreur de format avant meme d'arriver au validateur
