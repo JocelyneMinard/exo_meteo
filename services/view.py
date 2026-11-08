@@ -3,6 +3,7 @@ from sqlmodel import Session
 from models import Releves
 from models import Villes
 
+# View all statements for all cities
 def view_data(session: Session):
     try:
         requete = select(Villes)

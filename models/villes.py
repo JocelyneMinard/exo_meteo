@@ -8,8 +8,8 @@ class Villes(SQLModel, table = True):
     latitude: float
     longitude: float 
 
-    # Ce validateur est au final inutile car le JSON dans FastApi n'accepte pas la virgule
-    # Erreur de format avant meme d'arriver au validateur
+    # This validator is ultimately useless because JSON in FastAPI does not allow a trailing comma
+    # A format error occurs even before reaching the validator
     @field_validator('latitude', 'longitude', mode='before')
     @classmethod
     def replace_symbol(cls, v):
